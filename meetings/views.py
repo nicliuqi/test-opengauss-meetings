@@ -36,13 +36,13 @@ def IdentifyUser(request):
         return JsonResponse({'code': 400, 'msg': '请求头中缺少认证信息'})
     access_token = request.COOKIES['access_token']
     iv = request.COOKIES['iv']
-    user_id = int(cryptos.decrypt(access_token, iv))
+    user_id = int(cryptos.decrypt(access_token, iv.encode('utf-8')))
     return user_id
 
 
 def refresh_token(user_id):
-    iv = secrets.token_hex(8).encode('utf-8')
-    access_token = cryptos.encrypt(str(user_id), iv)
+    iv = secrets.token_hex(8)
+    access_token = cryptos.encrypt(str(user_id), iv.encode('utf-8'))
     return access_token, iv
 
 
@@ -88,8 +88,8 @@ class GiteeBackView(GenericAPIView, ListModelMixin):
                     User.objects.filter(gid=gid).update(gitee_id=gitee_id, name=name, avatar=avatar)
                 response = redirect(settings.REDIRECT_HOME_PAGE)
                 user_id = User.objects.get(gid=gid).id
-                iv = secrets.token_hex(8).encode('utf-8')
-                access_token = cryptos.encrypt(str(user_id), iv)
+                iv = secrets.token_hex(8)
+                access_token = cryptos.encrypt(str(user_id), iv.encode('utf-8'))
                 response.set_cookie('access_token', access_token)
                 response.set_cookie('iv', iv)
                 return response
