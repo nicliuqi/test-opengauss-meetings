@@ -40,7 +40,7 @@ def IdentifyUser(request):
 
 
 def refresh_token(user_id):
-    iv = secrets.token_hex(16).encode('utf-8')
+    iv = secrets.token_hex(8).encode('utf-8')
     access_token = cryptos.encrypt(str(user_id), iv)
     return access_token, iv
 
@@ -87,7 +87,7 @@ class GiteeBackView(GenericAPIView, ListModelMixin):
                     User.objects.filter(gid=gid).update(gitee_id=gitee_id, name=name, avatar=avatar)
                 response = redirect(settings.REDIRECT_HOME_PAGE)
                 user_id = User.objects.get(gid=gid).id
-                iv = secrets.token_hex(16).encode('utf-8')
+                iv = secrets.token_hex(8).encode('utf-8')
                 access_token = cryptos.encrypt(str(user_id), iv)
                 response.set_cookie('access_token', access_token)
                 return response
