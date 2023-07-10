@@ -91,6 +91,7 @@ class GiteeBackView(GenericAPIView, ListModelMixin):
                 iv = secrets.token_hex(8).encode('utf-8')
                 access_token = cryptos.encrypt(str(user_id), iv)
                 response.set_cookie('access_token', access_token)
+                response.set_cookie('iv', iv)
                 return response
         else:
             return JsonResponse(r.json())
