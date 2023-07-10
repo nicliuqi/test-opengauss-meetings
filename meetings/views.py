@@ -32,10 +32,11 @@ def IdentifyUser(request):
     :param request: request object
     :return: user_id
     """
-    if 'access_token' not in request.COOKIES.keys():
-        return JsonResponse({'code': 400, 'msg': '请求头中缺少access_token'})
+    if 'access_token' not in request.COOKIES.keys() or 'iv' not in request.COOKIES.keys():
+        return JsonResponse({'code': 400, 'msg': '请求头中缺少认证信息'})
     access_token = request.COOKIES['access_token']
-    user_id = int(cryptos.decrypt(access_token))
+    iv = request.COOKIES['iv']
+    user_id = int(cryptos.decrypt(access_token, iv))
     return user_id
 
 
