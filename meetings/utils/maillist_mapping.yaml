@@ -1,0 +1,17 @@
+TC: tc@opengauss.org
+SQLEngine: sqlengine@opengauss.org
+StorageEngine: storageengine@opengauss.org
+Connectors: connectors@opengauss.org
+Tools: tools@opengauss.org
+Docs: docs@opengauss.org
+Infra: infra@opengauss.org
+Security: securities@opengauss.org
+OM: om@opengauss.org
+In-place Update: inplaceupdate@opengauss.org
+IoT: iot@opengauss.org
+AI: ai@opengauss.org
+GIS: gis@opengauss.org
+CloudNative: cloudnative@opengauss.org
+SecurityTechnology: securitytechnology@opengauss.org
+Plugin: plugin@opengauss.org
+ReleaseManagement: releasemanagement@opengauss.org
