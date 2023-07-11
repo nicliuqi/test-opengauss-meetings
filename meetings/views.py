@@ -2,7 +2,6 @@ import datetime
 import json
 import logging
 import math
-import random
 import requests
 import secrets
 import yaml
@@ -216,7 +215,7 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
             logger.warning('暂无可用host')
             return JsonResponse({'code': 1000, 'msg': '时间冲突，请调整时间预定会议', 'en_msg': 'Schedule time conflict'})
         # 从available_host_id中随机生成一个host_id,并在host_dict中取出
-        host_id = random.choice(available_host_id)
+        host_id = secrets.choice(available_host_id)
         host = host_dict[host_id]
         logger.info('host_id:{}'.format(host_id))
         logger.info('host:{}'.format(host))
