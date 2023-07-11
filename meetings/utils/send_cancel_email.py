@@ -29,7 +29,7 @@ def sendmail(m):
     sig_name = m.get('sig_name')
     platform = m.get('platform')
     sequence = m.get('sequence')
-    sequence = meeting.sequence
+    sequence = m.get('sequence')
     sequence += 1
     start_time = ' '.join([date, start])
     toaddrs = toaddrs.replace(' ', '').replace('，', ',').replace(';', ',').replace('；', ',')
