@@ -12,13 +12,13 @@ class Command(BaseCommand):
         os.system('test -d meetings/tc && rm -rf meetings/tc')
         os.system('cd meetings; git clone https://gitee.com/opengauss/tc.git')
         with open('meetings/tc/sigs.yaml', 'r') as f:
-            content = yaml.load(f.read(), Loader=yaml.Loader)
+            content = yaml.safe_load(f)
         sigs = []
         for sig in content['sigs']:
             sig_name = sig['name']
             sig['sponsors'] = []
             with open('meetings/tc/sigs/{}/OWNERS'.format(sig_name), 'r') as f:
-                owners = yaml.load(f.read(), Loader=yaml.Loader)
+                owners = yaml.safe_load(f)
             for maintainer in owners['maintainers']:
                 sig['sponsors'].append(maintainer)
             for committer in owners['committers']:
@@ -34,7 +34,7 @@ class Command(BaseCommand):
             del sig['repositories']
             sigs.append(sig)
         with open('meetings/tc/OWNERS', 'r') as f:
-            owners = yaml.load(f.read(), Loader=yaml.Loader)
+            owners = yaml.safe_load(f)
         sig = {}
         sig['name'] = 'TC'
         sig['sponsors'] = []
@@ -49,5 +49,5 @@ class Command(BaseCommand):
         else:
             Group.objects.filter(name='TC').update(members=sig['sponsors'])
             logger.info('Update sig: TC')
-        with open('share/openGauss_sigs.yaml', 'w', encoding='utf-8') as f:
+        with open('share/openGauss_sigs.yaml', encoding='utf-8') as f:
             yaml.dump(sigs, f, default_flow_style=False)

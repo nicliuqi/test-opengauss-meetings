@@ -121,7 +121,7 @@ class UserInfoView(GenericAPIView):
             user = User.objects.get(id=user_id)
             gitee_id = user.gitee_id
             with open('share/openGauss_sigs.yaml', 'r') as f:
-                sigs = yaml.load(f.read(), Loader=yaml.Loader)
+                sigs = yaml.safe_load(f)
             self_sigs = []
             for sig in sigs:
                 if gitee_id in sig['sponsors']:
@@ -283,7 +283,7 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
         p1.start()
 
         # 返回请求数据
-        token, iv = refresh_token(user_id)
+        access_token, iv = refresh_token(user_id)
         resp = {'code': 201, 'msg': '创建成功', 'en_msg': 'Schedule meeting successfully'}
         meeting_id = Meeting.objects.get(mid=mid).id
         resp['id'] = meeting_id
@@ -413,7 +413,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
         p1 = Process(target=sendmail, args=(m, record))
         p1.start()
         # 返回请求数据
-        token, iv = refresh_token(user_id)
+        access_token, iv = refresh_token(user_id)
         resp = {'code': 204, 'msg': '修改成功', 'en_msg': 'Update successfully', 'id': mid}
         resp['access_token'] = access_token
         resp['iv'] = iv
@@ -443,7 +443,7 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         logger.info('{} has canceled meeting {}'.format(user.gitee_id, mid))
         from meetings.utils.send_cancel_email import sendmail
         sendmail(mid)
-        token, iv = refresh_token(user_id)
+        access_token, iv = refresh_token(user_id)
         return JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully',
             'access_token': access_token, 'iv': iv})
 

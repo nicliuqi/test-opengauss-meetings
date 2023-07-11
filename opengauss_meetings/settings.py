@@ -129,8 +129,8 @@ DATABASES = {
 
 OPENGAUSS_MEETING_HOSTS = {
     'zoom': {
-        os.getenv('ZOOM_HOST_FIRST', ''): 'public@cla.opengauss.org',
-        os.getenv('ZOOM_HOST_SECOND', ''): 'public@certificate.opengauss.org'
+        os.getenv('ZOOM_HOST_FIRST', ''): os.getenv('ZOOM_ACCOUNT_FIRST', ''),
+        os.getenv('ZOOM_HOST_SECOND', ''): os.getenv('ZOOM_ACCOUNT_SECOND', '')
     },
     'welink': {
         os.getenv('WELINK_HOST_1', ''): os.getenv('WELINK_HOST_1', '')
