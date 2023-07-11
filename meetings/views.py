@@ -453,6 +453,7 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         platform = platform.replace('zoom', 'Zoom').replace('welink', 'WeLink')
         sequence = meeting.sequence
         m = {
+            'mid': mid,
             'date': date,
             'start': start,
             'end': end,
