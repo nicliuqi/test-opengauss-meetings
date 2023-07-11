@@ -19,7 +19,7 @@ logger = logging.getLogger('log')
 
 
 def sendmail(m):
-    mid = m.get('mid')
+    mid = str(m.get('mid'))
     date = m.get('date')
     start = m.get('start')
     end = m.get('end')
