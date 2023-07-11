@@ -441,7 +441,30 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         user = User.objects.get(id=user_id)
         logger.info('{} has canceled meeting {}'.format(user.gitee_id, mid))
         from meetings.utils.send_cancel_email import sendmail
-        sendmail(mid)
+        meeting = Meeting.objects.get(mid=mid)
+        date = meeting.date
+        start = meeting.start
+        end = meeting.end
+        toaddrs = meeting.emaillist
+        sponsor = meeting.sponsor
+        topic = '[Cancel] ' + meeting.topic
+        sig_name = meeting.group_name
+        platform = meeting.mplatform
+        platform = platform.replace('zoom', 'Zoom').replace('welink', 'WeLink')
+        sequence = meeting.sequence
+        m = {
+            'date': date,
+            'start': start,
+            'end': end,
+            'toaddrs': toaddrs,
+            'sponsor': sponsor,
+            'topic': topic,
+            'sig_name': sig_name,
+            'platform': platform,
+            'sequence': sequence
+        }
+        sendmail(m)
+        Meeting.objects.filter(mid=mid).update(sequence=sequence + 1)
         access_token, iv = refresh_token(user_id)
         return JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully',
             'access_token': access_token, 'iv': iv})

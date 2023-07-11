@@ -1,6 +1,7 @@
 import datetime
 import icalendar
 import logging
+import os
 import pytz
 import re
 import smtplib
@@ -17,18 +18,17 @@ from meetings.models import Meeting
 logger = logging.getLogger('log')
 
 
-def sendmail(mid):
-    mid = str(mid)
-    meeting = Meeting.objects.get(mid=mid)
-    date = meeting.date
-    start = meeting.start
-    end = meeting.end
-    toaddrs = meeting.emaillist
-    sponsor = meeting.sponsor
-    topic = '[Cancel] ' + meeting.topic
-    sig_name = meeting.group_name
-    platform = meeting.mplatform
-    platform = platform.replace('zoom', 'Zoom').replace('welink', 'WeLink')
+def sendmail(m):
+    mid = m.get('mid')
+    date = m.get('date')
+    start = m.get('start')
+    end = m.get('end')
+    toaddrs = m.get('toaddrs')
+    sponsor = m.get('sponsor')
+    topic = '[Cancel] ' + m.get('topic')
+    sig_name = m.get('sig_name')
+    platform = m.get('platform')
+    sequence = m.get('sequence')
     sequence = meeting.sequence
     sequence += 1
     start_time = ' '.join([date, start])
@@ -117,6 +117,5 @@ def sendmail(mid):
         logger.info('error addrs: {}'.format(error_addrs))
         logger.info('email sent: {}'.format(toaddrs_string))
         server.quit()
-        Meeting.objects.filter(mid=mid).update(sequence=sequence)
     except smtplib.SMTPException as e:
         logger.error(e) 
