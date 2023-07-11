@@ -45,7 +45,7 @@ def sendmail(meeting, record=None, enclosure_paths=None):
     # 发送列表默认添加该sig所在的邮件列表
     newly_mapping = 'https://gitee.com/opengauss/tc/raw/master/maillist_mapping.yaml'
     cmd = 'wget {} -O meetings/utils/maillist_mapping.yaml'.format(newly_mapping)
-    subprocess.check_call(cmd)
+    subprocess.call(cmd.split())
     with open('meetings/utils/maillist_mapping.yaml', 'r') as f:
         maillists = yaml.safe_load(f)
     if sig_name in maillists.keys():

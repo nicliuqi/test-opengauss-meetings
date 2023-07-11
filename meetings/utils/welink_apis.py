@@ -223,4 +223,4 @@ def downloadHWCloudRecording(token, target_filename, download_url):
     if os.path.exists(target_filename):
         os.remove(target_filename)
     cmd = 'wget --header="Authorization: {}" -O {} {}'.format(token, target_filename, download_url)
-    subprocess.check_call(cmd)
+    subprocess.call(cmd.split())
