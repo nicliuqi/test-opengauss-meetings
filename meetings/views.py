@@ -31,18 +31,27 @@ def IdentifyUser(request):
     :param request: request object
     :return: user_id
     """
-    if 'access_token' not in request.COOKIES.keys() or 'iv' not in request.COOKIES.keys():
+    if 'access_token' not in request.COOKIES.keys():
         return JsonResponse({'code': 400, 'msg': '请求头中缺少认证信息'})
     access_token = request.COOKIES['access_token']
-    iv = request.COOKIES['iv']
-    user_id = int(cryptos.decrypt(access_token, iv.encode('utf-8')))
+    text, iv = access_token[:32], access_token[32:]
+    user_id = int(cryptos.decrypt(text, iv.encode('utf-8')))
     return user_id
 
 
 def refresh_token(user_id):
     iv = secrets.token_hex(8)
-    access_token = cryptos.encrypt(str(user_id), iv.encode('utf-8'))
-    return access_token, iv
+    text = cryptos.encrypt(str(user_id), iv.encode('utf-8'))
+    access_token = text + iv
+    return access_token
+
+
+def refresh_cookie(response):
+    response.delete_cookie('access_token')
+    now_time = datetime.datetime.now()
+    expire = now_time + settings.COOKIE_EXPIRE
+    response.set_cookie('access_token', access_token, expire=expire, secure=True, httponly=True, samesite=True)
+    return response
 
 
 class GiteeAuthView(GenericAPIView, ListModelMixin):
@@ -89,8 +98,9 @@ class GiteeBackView(GenericAPIView, ListModelMixin):
                 user_id = User.objects.get(gid=gid).id
                 iv = secrets.token_hex(8)
                 access_token = cryptos.encrypt(str(user_id), iv.encode('utf-8'))
-                response.set_cookie('access_token', access_token)
-                response.set_cookie('iv', iv)
+                now_time = datetime.datetime.now()
+                expire = now_time + settings.COOKIE_EXPIRE
+                response.set_cookie('access_token', access_token + iv, expire=expire, secure=True, httponly=True, samesite=None)
                 return response
         else:
             return JsonResponse(r.json())
@@ -103,7 +113,6 @@ class LogoutView(GenericAPIView):
     def get(self, request):
         response = redirect(settings.REDIRECT_HOME_PAGE)
         response.delete_cookie('access_token')
-        response.delete_cookie('iv')
         return response
 
 
@@ -282,13 +291,14 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
         p1.start()
 
         # 返回请求数据
-        access_token, iv = refresh_token(user_id)
+        access_token = refresh_token(user_id)
         resp = {'code': 201, 'msg': '创建成功', 'en_msg': 'Schedule meeting successfully'}
         meeting_id = Meeting.objects.get(mid=mid).id
         resp['id'] = meeting_id
         resp['access_token'] = access_token
-        resp['iv'] = iv
-        return JsonResponse(resp)
+        response = JsonResponse(resp)
+        refresh_cookie(response)
+        return response
 
 
 class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, RetrieveModelMixin):
@@ -411,12 +421,13 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
         }
         p1 = Process(target=sendmail, args=(m, record))
         p1.start()
+        Meeting.objects.filter(mid=mid).update(sequence=sequence + 1)
         # 返回请求数据
-        access_token, iv = refresh_token(user_id)
-        resp = {'code': 204, 'msg': '修改成功', 'en_msg': 'Update successfully', 'id': mid}
-        resp['access_token'] = access_token
-        resp['iv'] = iv
-        return JsonResponse(resp)
+        access_token = refresh_token(user_id)
+        resp = {'code': 204, 'msg': '修改成功', 'en_msg': 'Update successfully', 'id': mid, 'access_token': access_token}
+        response = JsonResponse(resp)
+        refresh_cookie(response)
+        return response
 
 
 class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
@@ -446,7 +457,6 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         start = meeting.start
         end = meeting.end
         toaddrs = meeting.emaillist
-        sponsor = meeting.sponsor
         topic = '[Cancel] ' + meeting.topic
         sig_name = meeting.group_name
         platform = meeting.mplatform
@@ -458,7 +468,6 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
             'start': start,
             'end': end,
             'toaddrs': toaddrs,
-            'sponsor': sponsor,
             'topic': topic,
             'sig_name': sig_name,
             'platform': platform,
@@ -466,9 +475,11 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         }
         sendmail(m)
         Meeting.objects.filter(mid=mid).update(sequence=sequence + 1)
-        access_token, iv = refresh_token(user_id)
-        return JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully',
-            'access_token': access_token, 'iv': iv})
+        access_token = refresh_token(user_id)
+        response = JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully',
+                                 'access_token': access_token})
+        refresh_cookie(response)
+        return response
 
 
 class MeetingDetailView(GenericAPIView, RetrieveModelMixin):

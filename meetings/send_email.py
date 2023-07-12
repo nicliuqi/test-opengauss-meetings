@@ -163,6 +163,5 @@ def sendmail(meeting, record=None, enclosure_paths=None):
         logger.info('error addrs: {}'.format(error_addrs))
         logger.info('email sent: {}'.format(toaddrs_string))
         server.quit()
-        Meeting.objects.filter(mid=mid).update(sequence=sequence)
     except smtplib.SMTPException as e:
         logger.error(e)

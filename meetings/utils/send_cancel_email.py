@@ -24,11 +24,9 @@ def sendmail(m):
     start = m.get('start')
     end = m.get('end')
     toaddrs = m.get('toaddrs')
-    sponsor = m.get('sponsor')
     topic = '[Cancel] ' + m.get('topic')
     sig_name = m.get('sig_name')
     platform = m.get('platform')
-    sequence = m.get('sequence')
     sequence = m.get('sequence')
     sequence += 1
     start_time = ' '.join([date, start])
@@ -72,8 +70,10 @@ def sendmail(m):
     msg.attach(content)
 
     # 取消日历
-    dt_start = (datetime.datetime.strptime(date + ' ' + start, '%Y-%m-%d %H:%M') - datetime.timedelta(hours=8)).replace(tzinfo=pytz.utc)
-    dt_end = (datetime.datetime.strptime(date + ' ' + end, '%Y-%m-%d %H:%M') - datetime.timedelta(hours=8)).replace(tzinfo=pytz.utc)
+    dt_start = (datetime.datetime.strptime(date + ' ' + start, '%Y-%m-%d %H:%M') - datetime.timedelta(hours=8)).replace(
+        tzinfo=pytz.utc)
+    dt_end = (datetime.datetime.strptime(date + ' ' + end, '%Y-%m-%d %H:%M') - datetime.timedelta(hours=8)).replace(
+        tzinfo=pytz.utc)
 
     cal = icalendar.Calendar()
     cal.add('prodid', '-//openeuler conference calendar')
@@ -118,4 +118,4 @@ def sendmail(m):
         logger.info('email sent: {}'.format(toaddrs_string))
         server.quit()
     except smtplib.SMTPException as e:
-        logger.error(e) 
+        logger.error(e)
