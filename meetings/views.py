@@ -6,6 +6,7 @@ import requests
 import secrets
 import yaml
 from django.conf import settings
+from django.middleware.csrf import get_token, rotate_token
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from rest_framework.filters import SearchFilter
@@ -31,9 +32,13 @@ def IdentifyUser(request):
     :param request: request object
     :return: user_id
     """
-    if 'access_token' not in request.COOKIES.keys():
+    access_token = request.COOKIES.get('access_token')
+    if not access_token:
         return JsonResponse({'code': 400, 'msg': '请求头中缺少认证信息'})
-    access_token = request.COOKIES['access_token']
+    if not isinstance(access_token, str):
+        return JsonResponse({'code': 400, 'msg': 'Bad Request'})
+    if len(access_token) != 48:
+        return JsonResponse({'code': 400, 'msg': 'Bad Request'})
     text, iv = access_token[:32], access_token[32:]
     user_id = int(cryptos.decrypt(text, iv.encode('utf-8')))
     return user_id
@@ -101,6 +106,7 @@ class GiteeBackView(GenericAPIView, ListModelMixin):
                 now_time = datetime.datetime.now()
                 expire = now_time + settings.COOKIE_EXPIRE
                 response.set_cookie('access_token', access_token + iv, expires=expire, secure=True, httponly=True, samesite='strict')
+                request.META['CSRF_COOKIE'] = get_token(request)
                 return response
         else:
             return JsonResponse(r.json())
@@ -111,8 +117,9 @@ class LogoutView(GenericAPIView):
     Log out
     """
     def get(self, request):
-        response = redirect(settings.REDIRECT_HOME_PAGE)
+        response = JsonResponse({'code': 200, 'msg': 'OK'})
         response.delete_cookie('access_token')
+        response.delete_cookie(settings.CSRF_COOKIE_NAME)
         return response
 
 
@@ -154,6 +161,7 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
     serializer_class = MeetingsSerializer
     queryset = Meeting.objects.all()
 
+    @ensure_csrf_cookie
     def post(self, request, *args, **kwargs):
         try:
             user_id = IdentifyUser(request)
@@ -299,6 +307,7 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
         resp['access_token'] = access_token
         response = JsonResponse(resp)
         refresh_cookie(response, access_token)
+        request.META['CSRF_COOKIE'] = rotate_token(request)
         return response
 
 
@@ -309,6 +318,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
     serializer_class = MeetingUpdateSerializer
     queryset = Meeting.objects.filter(is_delete=0)
 
+    @ensure_csrf_cookie
     def put(self, request, *args, **kwargs):
         # 鉴权
         try:
@@ -428,6 +438,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
         resp = {'code': 204, 'msg': '修改成功', 'en_msg': 'Update successfully', 'id': mid, 'access_token': access_token}
         response = JsonResponse(resp)
         refresh_cookie(response, access_token)
+        request.META['CSRF_COOKIE'] = rotate_token(request)
         return response
 
 
@@ -438,6 +449,7 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
     serializer_class = MeetingDeleteSerializer
     queryset = Meeting.objects.filter(is_delete=0)
 
+    @ensure_csrf_cookie
     def delete(self, request, *args, **kwargs):
         # 鉴权
         try:
@@ -480,6 +492,7 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         response = JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully',
                                  'access_token': access_token})
         refresh_cookie(response, access_token)
+        request.META['CSRF_COOKIE'] = rotate_token(request)
         return response
 
 
