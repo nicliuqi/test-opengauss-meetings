@@ -6,8 +6,8 @@ import requests
 import secrets
 import yaml
 from django.conf import settings
-from django.middleware.csrf import get_token, rotate_token
-from django.http import JsonResponse
+from django.middleware.csrf import get_token
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.filters import SearchFilter
@@ -307,7 +307,7 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
         resp['access_token'] = access_token
         response = JsonResponse(resp)
         refresh_cookie(response, access_token)
-        request.META['CSRF_COOKIE'] = rotate_token(request)
+        request.META['CSRF_COOKIE'] = get_token(request)
         return response
 
 
@@ -319,6 +319,8 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
     queryset = Meeting.objects.filter(is_delete=0)
 
     def put(self, request, *args, **kwargs):
+        if request.COOKIES.get('csrftoken') != request.headers.get('X-Csrftoken'):
+            return HttpResponse('403 Forbidden')
         # 鉴权
         try:
             user_id = IdentifyUser(request)
@@ -437,7 +439,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
         resp = {'code': 204, 'msg': '修改成功', 'en_msg': 'Update successfully', 'id': mid, 'access_token': access_token}
         response = JsonResponse(resp)
         refresh_cookie(response, access_token)
-        request.META['CSRF_COOKIE'] = rotate_token(request)
+        request.META['CSRF_COOKIE'] = get_token(request)
         return response
 
 
@@ -490,7 +492,7 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         response = JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully',
                                  'access_token': access_token})
         refresh_cookie(response, access_token)
-        request.META['CSRF_COOKIE'] = rotate_token(request)
+        request.META['CSRF_COOKIE'] = get_token(request)
         return response
 
 
