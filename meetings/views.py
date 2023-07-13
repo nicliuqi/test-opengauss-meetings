@@ -50,7 +50,7 @@ def refresh_cookie(response):
     response.delete_cookie('access_token')
     now_time = datetime.datetime.now()
     expire = now_time + settings.COOKIE_EXPIRE
-    response.set_cookie('access_token', access_token, expire=expire, secure=True, httponly=True, samesite=True)
+    response.set_cookie('access_token', access_token, expires=expire, secure=True, httponly=True, samesite=True)
     return response
 
 
@@ -100,7 +100,7 @@ class GiteeBackView(GenericAPIView, ListModelMixin):
                 access_token = cryptos.encrypt(str(user_id), iv.encode('utf-8'))
                 now_time = datetime.datetime.now()
                 expire = now_time + settings.COOKIE_EXPIRE
-                response.set_cookie('access_token', access_token + iv, expire=expire, secure=True, httponly=True, samesite=None)
+                response.set_cookie('access_token', access_token + iv, expires=expire, secure=True, httponly=True, samesite=None)
                 return response
         else:
             return JsonResponse(r.json())
