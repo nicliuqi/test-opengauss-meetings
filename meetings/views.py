@@ -46,7 +46,7 @@ def refresh_token(user_id):
     return access_token
 
 
-def refresh_cookie(response):
+def refresh_cookie(response, access_token):
     response.delete_cookie('access_token')
     now_time = datetime.datetime.now()
     expire = now_time + settings.COOKIE_EXPIRE
@@ -297,7 +297,7 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
         resp['id'] = meeting_id
         resp['access_token'] = access_token
         response = JsonResponse(resp)
-        refresh_cookie(response)
+        refresh_cookie(response, access_token)
         return response
 
 
@@ -426,7 +426,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
         access_token = refresh_token(user_id)
         resp = {'code': 204, 'msg': '修改成功', 'en_msg': 'Update successfully', 'id': mid, 'access_token': access_token}
         response = JsonResponse(resp)
-        refresh_cookie(response)
+        refresh_cookie(response, access_token)
         return response
 
 
@@ -478,7 +478,7 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         access_token = refresh_token(user_id)
         response = JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully',
                                  'access_token': access_token})
-        refresh_cookie(response)
+        refresh_cookie(response, access_token)
         return response
 
 
