@@ -9,6 +9,7 @@ from django.conf import settings
 from django.middleware.csrf import get_token, rotate_token
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, \
