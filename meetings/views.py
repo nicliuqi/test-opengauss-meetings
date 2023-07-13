@@ -163,8 +163,9 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
     queryset = Meeting.objects.all()
 
     def post(self, request, *args, **kwargs):
-        if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != self.request.headers.get('X-Csrftoken'):
-            return HttpResponse('403 Forbidden')
+        print(request)
+        #if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != self.request.headers.get('X-Csrftoken'):
+        #    return HttpResponse('403 Forbidden')
         try:
             user_id = IdentifyUser(request)
         except:
@@ -323,7 +324,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
     def put(self, request, *args, **kwargs):
         #if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != self.request.headers.get('X-Csrftoken'):
         #    return HttpResponse('403 Forbidden')
-        print(request.POST)
+        print(request)
         # 鉴权
         try:
             user_id = IdentifyUser(request)
@@ -454,8 +455,9 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
     queryset = Meeting.objects.filter(is_delete=0)
 
     def delete(self, request, *args, **kwargs):
-        if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != self.request.headers.get('X-Csrftoken'):
-            return HttpResponse('403 Forbidden')
+        print(request)
+        #if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != self.request.headers.get('X-Csrftoken'):
+        #    return HttpResponse('403 Forbidden')
         # 鉴权
         try:
             user_id = IdentifyUser(request)
