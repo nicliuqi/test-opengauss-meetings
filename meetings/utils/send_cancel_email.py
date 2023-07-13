@@ -101,7 +101,7 @@ def sendmail(m):
     sender = os.getenv('SMTP_SENDER', '')
     # 完善邮件信息
     msg['Subject'] = topic
-    msg['From'] = 'openGauss conference<{}>'.format(sender)
+    msg['From'] = 'openGauss conference<%s>' % sender
     msg['To'] = toaddrs_string
 
     # 登录服务器发送邮件
