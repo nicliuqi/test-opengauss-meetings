@@ -163,6 +163,8 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
     queryset = Meeting.objects.all()
 
     def post(self, request, *args, **kwargs):
+        print(request)
+        print(request.META)
         if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != request.headers.get('X-Csrftoken'):
             return HttpResponse('403 Forbidden')
         try:
