@@ -1,5 +1,6 @@
 import logging
 import os
+import stat
 import yaml
 from meetings.models import Group
 from django.core.management.base import BaseCommand
