@@ -7,9 +7,8 @@ import secrets
 import yaml
 from django.conf import settings
 from django.middleware.csrf import get_token
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, \
@@ -164,7 +163,7 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
 
     def post(self, request, *args, **kwargs):
         if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != request.META.get('HTTP_X_CSRFTOKEN'):
-            return HttpResponse('403 Forbidden')
+            return JsonResponse({'code': 403, 'msg': 'Forbidden'})
         try:
             user_id = IdentifyUser(request)
         except:
@@ -322,7 +321,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
 
     def put(self, request, *args, **kwargs):
         if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != request.META.get('HTTP_X_CSRFTOKEN'):
-            return HttpResponse('403 Forbidden')
+            return JsonResponse({'code': 403, 'msg': 'Forbidden'})
         # 鉴权
         try:
             user_id = IdentifyUser(request)
@@ -454,7 +453,7 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
 
     def delete(self, request, *args, **kwargs):
         if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != request.META.get('HTTP_X_CSRFTOKEN'):
-            return HttpResponse('403 Forbidden')
+            return JsonResponse({'code': 403, 'msg': 'Forbidden'})
         # 鉴权
         try:
             user_id = IdentifyUser(request)
