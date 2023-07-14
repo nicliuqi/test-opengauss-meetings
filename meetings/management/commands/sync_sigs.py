@@ -49,5 +49,7 @@ class Command(BaseCommand):
         else:
             Group.objects.filter(name='TC').update(members=sig['sponsors'])
             logger.info('Update sig: TC')
-        with open('share/openGauss_sigs.yaml', encoding='utf-8') as f:
+        flags = os.CREAT | os.O_WRONLY
+        modes = stat.S_IWUSR
+        with os.fdopen(os.open('share/openGauss_sigs.yaml', flags, modes), 'w') as f:
             yaml.dump(sigs, f, default_flow_style=False)
