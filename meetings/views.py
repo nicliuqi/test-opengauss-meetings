@@ -491,7 +491,7 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         sendmail(m)
         Meeting.objects.filter(mid=mid).update(sequence=sequence + 1)
         access_token = refresh_token(user_id)
-        response = JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully'}
+        response = JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully'})
         refresh_cookie(response, access_token)
         request.META['CSRF_COOKIE'] = get_token(request)
         return response

@@ -24,7 +24,7 @@ class Command(BaseCommand):
             sys.exit(1)
         obs_client = ObsClient(access_key_id=access_key_id,
                                secret_access_key=secret_access_key,
-                               server=endpoint)
+                               server='https://%s' % endpoint)
         objs = obs_client.listObjects(bucketName=bucketName)['body']['contents']
         # 遍历
         if len(objs) == 0:
