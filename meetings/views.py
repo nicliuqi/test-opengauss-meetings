@@ -163,7 +163,7 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
     queryset = Meeting.objects.all()
 
     def post(self, request, *args, **kwargs):
-        request.META.get('HTTP_X_CSRFTOKEN')
+        print(request.META.get('HTTP_X_CSRFTOKEN'))
         if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != request.META.get('HTTP_X-CSRFTOKEN'):
             return HttpResponse('403 Forbidden')
         try:
@@ -322,7 +322,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
     queryset = Meeting.objects.filter(is_delete=0)
 
     def put(self, request, *args, **kwargs):
-        request.META.get('HTTP_X_CSRFTOKEN')
+        print(request.META.get('HTTP_X_CSRFTOKEN'))
         if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != request.META.get('HTTP_X-CSRFTOKEN'):
             return HttpResponse('403 Forbidden')
         # 鉴权
