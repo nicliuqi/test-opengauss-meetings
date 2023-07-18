@@ -117,6 +117,10 @@ class LogoutView(GenericAPIView):
     Log out
     """
     def get(self, request):
+        try:
+            user_id = IdentifyUser(request)
+        except:
+            return JsonResponse({'code': 401, 'msg': '用户未认证', 'en_msg': 'Unauthorised'})
         response = JsonResponse({'code': 200, 'msg': 'OK'})
         response.delete_cookie('access_token')
         response.delete_cookie(settings.CSRF_COOKIE_NAME)
