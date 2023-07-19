@@ -136,7 +136,7 @@ class LogoutView(GenericAPIView):
             user_id = IdentifyUser(request)
             expire_time = User.objects.get(id=user_id).expire_time
             if not check_expire(expire_time, now_time):
-                return JsonResponse({'coed': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
+                return JsonResponse({'code': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
         except:
             return JsonResponse({'code': 401, 'msg': '用户未认证', 'en_msg': 'Unauthorised'})
         User.objects.filter(id=user_id).update(expire_time=0)
@@ -192,7 +192,7 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
             user_id = IdentifyUser(request)
             expire_time = User.objects.get(id=user_id).expire_time
             if not check_expire(expire_time, now_time):
-                return JsonResponse({'coed': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
+                return JsonResponse({'code': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
         except:
             return JsonResponse({'code': 401, 'msg': '用户未认证', 'en_msg': 'Unauthorised'})
         data = self.request.data
@@ -354,7 +354,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
             user_id = IdentifyUser(request)
             expire_time = User.objects.get(id=user_id).expire_time
             if not check_expire(expire_time, now_time):
-                return JsonResponse({'coed': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
+                return JsonResponse({'code': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
         except:
             return JsonResponse({'code': 401, 'msg': '用户未认证', 'en_msg': 'Unauthorised'})
         mid = self.kwargs.get('mid')
@@ -490,7 +490,7 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
             user_id = IdentifyUser(request)
             expire_time = User.objects.get(id=user_id).expire_time
             if not check_expire(expire_time, now_time):
-                return JsonResponse({'coed': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
+                return JsonResponse({'code': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
         except:
             return JsonResponse({'code': 401, 'msg': '用户未认证', 'en_msg': 'Unauthorised'})
         mid = self.kwargs.get('mid')
