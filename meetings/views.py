@@ -139,7 +139,7 @@ class LogoutView(GenericAPIView):
                 return JsonResponse({'coed': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
         except:
             return JsonResponse({'code': 401, 'msg': '用户未认证', 'en_msg': 'Unauthorised'})
-        User.objects.filter(id=request.user.id).update(expire_time=0)
+        User.objects.filter(id=user_id).update(expire_time=0)
         response = JsonResponse({'code': 200, 'msg': 'OK'})
         response.delete_cookie(settings.ACCESS_TOKEN_NAME)
         response.delete_cookie(settings.CSRF_COOKIE_NAME)
