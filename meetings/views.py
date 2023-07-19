@@ -4,6 +4,7 @@ import logging
 import math
 import requests
 import secrets
+import time
 import yaml
 from django.conf import settings
 from django.middleware.csrf import get_token
@@ -32,7 +33,7 @@ def IdentifyUser(request):
     :param request: request object
     :return: user_id
     """
-    access_token = request.COOKIES.get('access_token')
+    access_token = request.COOKIES.get(settings.ACCESS_TOKEN_NAME)
     if not access_token:
         return JsonResponse({'code': 400, 'msg': '请求头中缺少认证信息'})
     if not isinstance(access_token, str):
@@ -51,12 +52,23 @@ def refresh_token(user_id):
     return access_token
 
 
-def refresh_cookie(response, access_token):
-    response.delete_cookie('access_token')
+def refresh_cookie(user_id, response, access_token):
+    response.delete_cookie(settings.ACCESS_TOKEN_NAME)
     now_time = datetime.datetime.now()
     expire = now_time + settings.COOKIE_EXPIRE
-    response.set_cookie('access_token', access_token, expires=expire, secure=True, httponly=True, samesite='strict')
+    expire_timestamp = int(time.mktime(expire.timetuple()))
+    User.objects.get(id=user_id).update(expire_time=expire_timestamp)
+    response.set_cookie(settings.ACCESS_TOKEN_NAME, access_token, expires=expire, secure=True, httponly=True, samesite='strict')
     return response
+
+
+def check_expire(expire_time, now_time):
+    if expire_time == 0:
+        return False
+    if now_time > expire_time:
+        return False
+    else:
+        return True
 
 
 class GiteeAuthView(GenericAPIView, ListModelMixin):
@@ -88,7 +100,7 @@ class GiteeBackView(GenericAPIView, ListModelMixin):
             'https://gitee.com/oauth/token?grant_type=authorization_code&code={}&client_id={}&redirect_uri={}&client_secret={}'.format(
                 code, client_id, redirect_uri, client_secret))
         if r.status_code == 200:
-            access_token = r.json()['access_token']
+            access_token = r.json()[settings.ACCESS_TOKEN_NAME]
             r = requests.get('https://gitee.com/api/v5/user?access_token={}'.format(access_token))
             if r.status_code == 200:
                 gid = r.json()['id']
@@ -105,7 +117,9 @@ class GiteeBackView(GenericAPIView, ListModelMixin):
                 access_token = cryptos.encrypt(str(user_id), iv.encode('utf-8'))
                 now_time = datetime.datetime.now()
                 expire = now_time + settings.COOKIE_EXPIRE
-                response.set_cookie('access_token', access_token + iv, expires=expire, secure=True, httponly=True, samesite='strict')
+                expire_timestamp = int(time.mktime(expire.timetuple()))
+                User.objects.filter(gid=gid).update(expire_time=expire_timestamp)
+                response.set_cookie(settings.ACCESS_TOKEN_NAME, access_token + iv, expires=expire, secure=True, httponly=True, samesite='strict')
                 request.META['CSRF_COOKIE'] = get_token(self.request)
                 return response
         else:
@@ -118,11 +132,15 @@ class LogoutView(GenericAPIView):
     """
     def get(self, request):
         try:
+            now_time = int(time.time())
             user_id = IdentifyUser(request)
+            expire_time = User.objects.get(id=user_id).expire_time
+            if not check_expire(expire_time, now_time):
+                return JsonResponse({'coed': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
         except:
             return JsonResponse({'code': 401, 'msg': '用户未认证', 'en_msg': 'Unauthorised'})
         response = JsonResponse({'code': 200, 'msg': 'OK'})
-        response.delete_cookie('access_token')
+        response.delete_cookie(settings.ACCESS_TOKEN_NAME)
         response.delete_cookie(settings.CSRF_COOKIE_NAME)
         return response
 
@@ -169,7 +187,11 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
         if request.COOKIES.get(settings.CSRF_COOKIE_NAME) != request.META.get('HTTP_X_CSRFTOKEN'):
             return JsonResponse({'code': 403, 'msg': 'Forbidden'})
         try:
+            now_time = int(time.time())
             user_id = IdentifyUser(request)
+            expire_time = User.objects.get(id=user_id).expire_time
+            if not check_expire(expire_time, now_time):
+                return JsonResponse({'coed': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
         except:
             return JsonResponse({'code': 401, 'msg': '用户未认证', 'en_msg': 'Unauthorised'})
         data = self.request.data
@@ -310,7 +332,7 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
         meeting_id = Meeting.objects.get(mid=mid).id
         resp['id'] = meeting_id
         response = JsonResponse(resp)
-        refresh_cookie(response, access_token)
+        refresh_cookie(user_id, response, access_token)
         request.META['CSRF_COOKIE'] = get_token(request)
         return response
 
@@ -327,7 +349,11 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
             return JsonResponse({'code': 403, 'msg': 'Forbidden'})
         # 鉴权
         try:
+            now_time = int(time.time())
             user_id = IdentifyUser(request)
+            expire_time = User.objects.get(id=user_id).expire_time
+            if not check_expire(expire_time, now_time):
+                return JsonResponse({'coed': 401, 'msg': '身份认证过期', 'en_msg': 'Unauthorised'})
         except:
             return JsonResponse({'code': 401, 'msg': '用户未认证', 'en_msg': 'Unauthorised'})
         mid = self.kwargs.get('mid')
@@ -442,7 +468,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
         access_token = refresh_token(user_id)
         resp = {'code': 204, 'msg': '修改成功', 'en_msg': 'Update successfully', 'id': mid}
         response = JsonResponse(resp)
-        refresh_cookie(response, access_token)
+        refresh_cookie(user_id, response, access_token)
         request.META['CSRF_COOKIE'] = get_token(request)
         return response
 
@@ -496,7 +522,7 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         Meeting.objects.filter(mid=mid).update(sequence=sequence + 1)
         access_token = refresh_token(user_id)
         response = JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully'})
-        refresh_cookie(response, access_token)
+        refresh_cookie(user_id, response, access_token)
         request.META['CSRF_COOKIE'] = get_token(request)
         return response
 

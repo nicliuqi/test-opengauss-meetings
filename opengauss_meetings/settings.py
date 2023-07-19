@@ -267,3 +267,4 @@ CSRF_COOKIE_NAME = 'meeting-csrftoken'
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'strict'
 COOKIE_EXPIRE = timedelta(minutes=30)
+ACCESS_TOKEN_NAME = 'meeting-accesstoken'

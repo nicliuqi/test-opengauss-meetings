@@ -9,6 +9,7 @@ class User(models.Model):
     avatar = models.CharField(verbose_name='头像', max_length=255)
     email = models.EmailField(verbose_name='邮箱')
     create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
+    expire_time = models.IntegerField(verbose_name='过期时间', default=0)
 
 
 class Group(models.Model):
