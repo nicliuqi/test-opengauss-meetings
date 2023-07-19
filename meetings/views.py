@@ -100,7 +100,7 @@ class GiteeBackView(GenericAPIView, ListModelMixin):
             'https://gitee.com/oauth/token?grant_type=authorization_code&code={}&client_id={}&redirect_uri={}&client_secret={}'.format(
                 code, client_id, redirect_uri, client_secret))
         if r.status_code == 200:
-            access_token = r.json()[settings.ACCESS_TOKEN_NAME]
+            access_token = r.json()['access_token']
             r = requests.get('https://gitee.com/api/v5/user?access_token={}'.format(access_token))
             if r.status_code == 200:
                 gid = r.json()['id']
