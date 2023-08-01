@@ -57,7 +57,7 @@ def refresh_cookie(user_id, response, access_token):
     now_time = datetime.datetime.now()
     expire = now_time + settings.COOKIE_EXPIRE
     expire_timestamp = int(time.mktime(expire.timetuple()))
-    User.objects.get(id=user_id).update(expire_time=expire_timestamp)
+    User.objects.filter(id=user_id).update(expire_time=expire_timestamp)
     response.set_cookie(settings.ACCESS_TOKEN_NAME, access_token, expires=expire, secure=True, httponly=True, samesite='strict')
     return response
 

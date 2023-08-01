@@ -98,7 +98,7 @@ def sendmail(m):
 
     msg.attach(part)
 
-    sender = os.getenv('SMTP_SENDER', '')
+    sender = settings.DEFAULT_CONF.get('SMTP_SENDER', '')
     # 完善邮件信息
     msg['Subject'] = topic
     msg['From'] = 'openGauss conference<%s>' % sender
@@ -119,3 +119,4 @@ def sendmail(m):
         server.quit()
     except smtplib.SMTPException as e:
         logger.error(e)
+

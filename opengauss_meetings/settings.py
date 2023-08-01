@@ -14,25 +14,38 @@ import time
 import os
 from datetime import timedelta
 from pathlib import Path
+import subprocess
+import sys
+import yaml
+
+
+if os.path.exists('/vault/secrets/secrets.yaml'):
+    with open('/vault/secrets/secrets.yaml', 'r') as f:
+        content = yaml.safe_load(f)
+    DEFAULT_CONF = content
+else:
+    sys.exit()
+if sys.argv[0] == 'uwsgi':
+    os.remove('/vault/secrets/secrets.yaml')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ZOOM_TOKEN = os.getenv('ZOOM_TOKEN', '')
+ZOOM_TOKEN = DEFAULT_CONF.get('ZOOM_TOKEN', '')
 
-GITEE_OAUTH_CLIENT_ID = os.getenv('GITEE_OAUTH_CLIENT_ID', '')
+GITEE_OAUTH_CLIENT_ID = DEFAULT_CONF.get('GITEE_OAUTH_CLIENT_ID', '')
 
-GITEE_OAUTH_CLIENT_SECRET = os.getenv('GITEE_OAUTH_CLIENT_SECRET', '')
+GITEE_OAUTH_CLIENT_SECRET = DEFAULT_CONF.get('GITEE_OAUTH_CLIENT_SECRET', '')
 
-GITEE_OAUTH_REDIRECT = os.getenv('GITEE_OAUTH_REDIRECT', '')
+GITEE_OAUTH_REDIRECT = DEFAULT_CONF.get('GITEE_OAUTH_REDIRECT', '')
 
-REDIRECT_HOME_PAGE = os.getenv('REDIRECT_HOME_PAGE', '')
+REDIRECT_HOME_PAGE = DEFAULT_CONF.get('REDIRECT_HOME_PAGE', '')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', '')
+SECRET_KEY = DEFAULT_CONF.get('SECRET_KEY', '')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -120,27 +133,27 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'opengauss_meetings',
-        'USER': os.getenv('DB_USER', 'root'),
-        'PASSWORD': os.getenv('DB_PASSWORD', '123456'),
-        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
-        'PORT': os.getenv('DB_PORT', '3306'),
+        'USER': DEFAULT_CONF.get('DB_USER', 'root'),
+        'PASSWORD': DEFAULT_CONF.get('DB_PASSWORD', '123456'),
+        'HOST': DEFAULT_CONF.get('DB_HOST', '127.0.0.1'),
+        'PORT': DEFAULT_CONF.get('DB_PORT', '3306'),
     }
 }
 
 OPENGAUSS_MEETING_HOSTS = {
     'zoom': {
-        os.getenv('ZOOM_HOST_FIRST', ''): os.getenv('ZOOM_ACCOUNT_FIRST', ''),
-        os.getenv('ZOOM_HOST_SECOND', ''): os.getenv('ZOOM_ACCOUNT_SECOND', '')
+        DEFAULT_CONF.get('ZOOM_HOST_FIRST', ''): DEFAULT_CONF.get('ZOOM_ACCOUNT_FIRST', ''),
+        DEFAULT_CONF.get('ZOOM_HOST_SECOND', ''): DEFAULT_CONF.get('ZOOM_ACCOUNT_SECOND', '')
     },
     'welink': {
-        os.getenv('WELINK_HOST_1', ''): os.getenv('WELINK_HOST_1', '')
+        DEFAULT_CONF.get('WELINK_HOST_1', ''): DEFAULT_CONF.get('WELINK_HOST_1', '')
     }
 }
 
 WELINK_HOSTS = {
-    os.getenv('WELINK_HOST_1', ''): {
-        'account': os.getenv('WELINK_HOST_1_ACCOUNT', ''),
-        'pwd': os.getenv('WELINK_HOST_1_PWD', '')
+    DEFAULT_CONF.get('WELINK_HOST_1', ''): {
+        'account': DEFAULT_CONF.get('WELINK_HOST_1_ACCOUNT', ''),
+        'pwd': DEFAULT_CONF.get('WELINK_HOST_1_PWD', '')
     }
 }
 
@@ -259,12 +272,13 @@ LOGGING = {
     }
 }
 
-GMAIL_USERNAME = os.getenv('GMAIL_USERNAME', '')
-GMAIL_PASSWORD = os.getenv('GMAIL_PASSWORD', '')
-SMTP_SERVER_HOST = os.getenv('SMTP_SERVER_HOST', '')
+GMAIL_USERNAME = DEFAULT_CONF.get('GMAIL_USERNAME', '')
+GMAIL_PASSWORD = DEFAULT_CONF.get('GMAIL_PASSWORD', '')
+SMTP_SERVER_HOST = DEFAULT_CONF.get('SMTP_SERVER_HOST', '')
 SMTP_SERVER_PORT = 25
 CSRF_COOKIE_NAME = 'meeting-csrftoken'
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'strict'
 COOKIE_EXPIRE = timedelta(minutes=30)
 ACCESS_TOKEN_NAME = 'meeting-accesstoken'
+

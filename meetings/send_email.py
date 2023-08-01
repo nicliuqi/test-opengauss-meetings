@@ -1,7 +1,6 @@
 import datetime
 import icalendar
 import logging
-import os
 import pytz
 import re
 import smtplib
@@ -144,7 +143,7 @@ def sendmail(meeting, record=None, enclosure_paths=None):
 
     msg.attach(part)
 
-    sender = os.getenv('SMTP_SENDER', '')
+    sender = settings.DEFAULT_CONF.get('SMTP_SENDER', '')
     # 完善邮件信息
     msg['Subject'] = topic
     msg['From'] = 'openGauss conference <%s>' % sender
@@ -165,3 +164,4 @@ def sendmail(meeting, record=None, enclosure_paths=None):
         server.quit()
     except smtplib.SMTPException as e:
         logger.error(e)
+
