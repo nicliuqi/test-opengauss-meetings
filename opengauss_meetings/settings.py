@@ -27,6 +27,8 @@ else:
     sys.exit()
 if sys.argv[0] == 'uwsgi':
     os.remove('/vault/secrets/secrets.yaml')
+    if 'xarmor_pyrasp.ini' in os.listdir():
+        os.remove('./xarmor_pyrasp.ini')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
