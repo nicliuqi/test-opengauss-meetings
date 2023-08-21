@@ -17,6 +17,7 @@ from pathlib import Path
 import subprocess
 import sys
 import yaml
+from meetings.utils.zoom_apis import getOauthToken
 
 
 CONFIG_PATH = os.getenv('CONFIG_PATH')
@@ -34,8 +35,10 @@ if sys.argv[0] == 'uwsgi':
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-from meetings.utils.zoom_apis import getOauthToken
-ZOOM_TOKEN = getOauthToken()
+account_id = DEFAULT_CONF.get('ZOOM_ACCOUTN_ID')
+client_id = DEFAULT_CONF.get('ZOOM_CLIENT_ID')
+client_secret = DEFAULT_CONF.get('ZOOM_CLIENT_SECRET')
+ZOOM_TOKEN = getOauthToken(account_id, client_id, client_secert)
 
 GITEE_OAUTH_CLIENT_ID = DEFAULT_CONF.get('GITEE_OAUTH_CLIENT_ID', '')
 

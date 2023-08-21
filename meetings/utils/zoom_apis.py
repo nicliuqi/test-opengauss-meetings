@@ -96,12 +96,9 @@ def getParticipants(mid):
         return r.status_code, r.json()
 
 
-def getOauthToken():
+def getOauthToken(account_id, client_id, client_secret):
 	"""Get server to server oauth token"""
 	url = 'https://zoom.us/oauth/token'
-	account_id = settings.DEFAULT_CONF.get('ZOOM_ACCOUTN_ID')
-	client_id = settings.DEFAULT_CONF.get('ZOOM_CLIENT_ID')
-	client_secret = settings.DEFAULT_CONF.get('ZOOM_CLIENT_SECRET')
 	payload = {
 		'grant_type': 'account_credentials',
 		'account_id': account_id
