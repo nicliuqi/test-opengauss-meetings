@@ -1,3 +1,4 @@
+import base64
 import datetime
 import logging
 import json
@@ -93,3 +94,25 @@ def getParticipants(mid):
         return r.status_code, resp
     else:
         return r.status_code, r.json()
+
+
+def getOauthToken():
+	"""Get server to server oauth token"""
+	url = 'https://zoom.us/oauth/token'
+	account_id = settings.DEFAULT_CONF.get('ZOOM_ACCOUTN_ID')
+	client_id = settings.DEFAULT_CONF.get('ZOOM_CLIENT_ID')
+	client_secret = settings.DEFAULT_CONF.get('ZOOM_CLIENT_SECRET')
+	payload = {
+		'grant_type': 'account_credentials',
+		'account_id': account_id
+	}
+	headers = {
+		'Host': 'zoom.us',
+		'Authorization': 'Basic {}'.format(base64.b64encode((client_id + ':' + client_secret).encode()).decode())
+	}
+	r = requests.post(url, data=payload, headers=headers)
+	if r.status_code != 200:
+		logger.error('Fail to get zoom token:')
+		logger.error(r.json())
+		return None
+	return r.json().get('access_token')

@@ -17,23 +17,25 @@ from pathlib import Path
 import subprocess
 import sys
 import yaml
+from meetings.utils.zoom_apis import getOauthToken
 
 
-if os.path.exists('/vault/secrets/secrets.yaml'):
-    with open('/vault/secrets/secrets.yaml', 'r') as f:
-        content = yaml.safe_load(f)
-    DEFAULT_CONF = content
-else:
+CONFIG_PATH = os.getenv('CONFIG_PATH')
+XARMOR_CONF = os.getenv('XARMOR_CONF')
+if not os.path.exists(CONFIG_PATH):
     sys.exit()
+with open(CONFIG_PATH, 'r') as f:
+    content = yaml.safe_load(f)
+DEFAULT_CONF = content
 if sys.argv[0] == 'uwsgi':
-    os.remove('/vault/secrets/secrets.yaml')
-    if 'xarmor_pyrasp.ini' in os.listdir():
-        os.remove('./xarmor_pyrasp.ini')
+    os.remove(CONFIG_PATH)
+    if os.path.basename(XARMOR_CONF) in os.listdir():
+        os.remove(os.path.basename(XARMOR_CONF))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ZOOM_TOKEN = DEFAULT_CONF.get('ZOOM_TOKEN', '')
+ZOOM_TOKEN = getOauthToken()
 
 GITEE_OAUTH_CLIENT_ID = DEFAULT_CONF.get('GITEE_OAUTH_CLIENT_ID', '')
 
