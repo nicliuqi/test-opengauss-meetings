@@ -38,7 +38,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 account_id = DEFAULT_CONF.get('ZOOM_ACCOUTN_ID')
 client_id = DEFAULT_CONF.get('ZOOM_CLIENT_ID')
 client_secret = DEFAULT_CONF.get('ZOOM_CLIENT_SECRET')
-ZOOM_TOKEN = getOauthToken(account_id, client_id, client_secert)
+ZOOM_TOKEN = getOauthToken(account_id, client_id, client_secret)
 
 GITEE_OAUTH_CLIENT_ID = DEFAULT_CONF.get('GITEE_OAUTH_CLIENT_ID', '')
 
