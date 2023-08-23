@@ -9,15 +9,14 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-import datetime
-import time
+import base64
 import os
-from datetime import timedelta
-from pathlib import Path
-import subprocess
+import time
+import requests
 import sys
 import yaml
-from meetings.utils.zoom_apis import getOauthToken
+from datetime import timedelta
+from pathlib import Path
 
 
 CONFIG_PATH = os.getenv('CONFIG_PATH')
@@ -35,10 +34,28 @@ if sys.argv[0] == 'uwsgi':
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-account_id = DEFAULT_CONF.get('ZOOM_ACCOUTN_ID')
-client_id = DEFAULT_CONF.get('ZOOM_CLIENT_ID')
-client_secret = DEFAULT_CONF.get('ZOOM_CLIENT_SECRET')
-ZOOM_TOKEN = getOauthToken(account_id, client_id, client_secret)
+
+def getOauthToken(account_id, client_id, client_secret, zoom_auth_url):
+    """Get server to server oauth token"""
+    url = zoom_auth_url
+    payload = {
+        'grant_type': 'account_credentials',
+        'account_id': account_id
+    }
+    headers = {
+        'Host': 'zoom.us',
+        'Authorization': 'Basic {}'.format(base64.b64encode((client_id + ':' + client_secret).encode()).decode())
+    }
+    r = requests.post(url, data=payload, headers=headers)
+    if r.status_code != 200:
+        return None
+    return r.json().get('access_token')
+
+account_id = DEFAULT_CONF.get('ZOOM_ACCOUTN_ID', '')
+client_id = DEFAULT_CONF.get('ZOOM_CLIENT_ID', '')
+client_secret = DEFAULT_CONF.get('ZOOM_CLIENT_SECRET', '')
+zoom_auth_url = DEFAULT_CONF.get('ZOOM_AUTH_URL', '')
+ZOOM_TOKEN = getOauthToken(account_id, client_id, client_secret, zoom_auth_url)
 
 GITEE_OAUTH_CLIENT_ID = DEFAULT_CONF.get('GITEE_OAUTH_CLIENT_ID', '')
 
@@ -109,7 +126,6 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'opengauss_meetings.urls'
@@ -206,7 +222,8 @@ cur_path = os.path.dirname(os.path.realpath(__file__))  # log_path是存放日�
 
 log_path = os.path.join(os.path.dirname(cur_path), 'logs')
 
-if not os.path.exists(log_path): os.mkdir(log_path)  # 如果不存在这个logs文件夹，就自动创建一个
+if not os.path.exists(log_path):
+    os.mkdir(log_path)  # 如果不存在这个logs文件夹，就自动创建一个
 
 LOGGING = {
     'version': 1,

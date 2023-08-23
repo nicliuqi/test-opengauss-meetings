@@ -34,4 +34,3 @@ ENV LANG=en_US.UTF-8
 
 EXPOSE 8080
 ENTRYPOINT ["uwsgi", "--ini", "/work/app-meeting-server/deploy/production/uwsgi.ini"]
-
