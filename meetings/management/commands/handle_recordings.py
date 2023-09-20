@@ -13,6 +13,7 @@ from meetings.models import Meeting, Video, Record
 from multiprocessing.dummy import Pool as ThreadPool
 from meetings.utils.html_template import cover_content
 from meetings.utils.welink_apis import getParticipants, listRecordings, downloadHWCloudRecording, getDetailDownloadUrl
+from meetings.utils.zoom_apis import getOauthToken
 
 logger = logging.getLogger('log')
 
@@ -42,8 +43,9 @@ def get_recordings(mid):
     """
     host_id = Meeting.objects.get(mid=mid).host_id
     url = 'https://api.zoom.us/v2/users/{}/recordings'.format(host_id)
+    token = getOauthToken()
     headers = {
-        'authorization': 'Bearer {}'.format(settings.ZOOM_TOKEN)
+        'authorization': 'Bearer {}'.format(token)
     }
     params = {
         'from': (datetime.datetime.now() - datetime.timedelta(days=7)).strftime("%Y-%m-%d"),
@@ -74,8 +76,9 @@ def get_participants(mid):
     :return: the json-encoded content of a response or none
     """
     url = 'https://api.zoom.us/v2/past_meetings/{}/participants'.format(mid)
+    token = getOauthToken()
     headers = {
-        'authorization': 'Bearer {}'.format(settings.ZOOM_TOKEN)
+        'authorization': 'Bearer {}'.format(token)
     }
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
@@ -268,7 +271,7 @@ def handle_zoom_recordings(mid):
             try:
                 obs_client = ObsClient(access_key_id=access_key_id,
                                        secret_access_key=secret_access_key,
-                                       server='https://{}'.format(endpoint))
+                                       server='https://%s' % endpoint)
                 objs = obs_client.listObjects(bucketName=bucketName)
                 # 预备文件上传路径
                 start = recordings_list[0]['recording_start']
@@ -443,7 +446,7 @@ def after_download_recording(target_filename, start, end, mid, target_name):
         try:
             obs_client = ObsClient(access_key_id=access_key_id,
                                    secret_access_key=secret_access_key,
-                                   server='https://{}'.format(endpoint))
+                                   server='https://%s' % endpoint)
             objs = obs_client.listObjects(bucketName=bucketName)
             # 预备文件上传路径
             date = Meeting.objects.get(mid=mid).date
