@@ -106,6 +106,30 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'opengauss_meetings.urls'
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=60),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+
+    # 'AUTH_HEADER_TYPES': (,),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=1000),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -274,3 +298,5 @@ COOKIE_EXPIRE = timedelta(minutes=30)
 ACCESS_TOKEN_NAME = 'meeting-accesstoken'
 ZOOM_AUTH_URL = DEFAULT_CONF.get('ZOOM_AUTH_URL')
 ZOOM_AUTH_HEADER = DEFAULT_CONF.get('ZOOM_AUTH_HEADER')
+AES_GCM_SECRET = DEFAULT_CONF.get('AES_GCM_SECRET')
+AES_GCM_IV = DEFAULT_CONF.get('AES_GCM_IV')

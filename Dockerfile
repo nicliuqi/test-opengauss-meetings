@@ -6,8 +6,6 @@ RUN yum update -y && \
     yum install -y vim wget git xz tar make automake autoconf libtool gcc gcc-c++ kernel-devel libmaxminddb-devel pcre-devel openssl openssl-devel tzdata \
         readline-devel libffi-devel python3-devel mariadb-devel python3-pip net-tools.x86_64 iputils
 
-RUN pip3 install uwsgi
-
 WORKDIR /work/app-meeting-server
 COPY . /work/app-meeting-server
 COPY ./deploy/fonts/simsun.ttc /usr/share/fonts

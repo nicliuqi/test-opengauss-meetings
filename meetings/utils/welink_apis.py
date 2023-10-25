@@ -118,7 +118,6 @@ def cancelMeeting(mid, host_id):
         'type': 1
     }
     response = requests.delete(url, headers=headers, params=params)
-    print(response.status_code)
     if response.status_code != 200:
         logger.error('Fail to cancel meeting {}'.format(mid))
         logger.error(response.json())

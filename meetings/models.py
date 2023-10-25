@@ -1,21 +1,88 @@
+import unicodedata
 from django.db import models
 
 
-class User(models.Model):
+class MyAbstractBaseUser(models.Model):
+    EMAIL_FIELD = None
+    is_active = True
+
+    REQUIRED_FIELDS = []
+
+    class Meta:
+        abstract = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.USERNAME_FIELD = None
+
+    def __str__(self):
+        return self.get_username()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+    def get_username(self):
+        """Return the username for this User."""
+        return str(self.USERNAME_FIELD)
+
+    def clean(self):
+        setattr(self, self.USERNAME_FIELD, self.normalize_username(self.get_username()))
+
+    def natural_key(self):
+        return (self.get_username(),)
+
+    @property
+    def is_anonymous(self):
+        """
+        Always return False. This is a way of comparing User objects to
+        anonymous users.
+        """
+        return False
+
+    @property
+    def is_authenticated(self):
+        """
+        Always return True. This is a way to tell if the user has been
+        authenticated in templates.
+        """
+        return True
+
+    @classmethod
+    def get_email_field_name(cls):
+        try:
+            return cls.EMAIL_FIELD
+        except AttributeError:
+            return 'email'
+
+    @classmethod
+    def normalize_username(cls, username):
+        return unicodedata.normalize('NFKC', username) if isinstance(username, str) else username
+
+
+class User(MyAbstractBaseUser):
     """用户表"""
-    gid = models.IntegerField(verbose_name='Gitee用户唯一标识')
-    gitee_id = models.CharField(verbose_name='GiteeID', max_length=50)
-    name = models.CharField(verbose_name='昵称', max_length=50)
-    avatar = models.CharField(verbose_name='头像', max_length=255)
-    email = models.EmailField(verbose_name='邮箱')
+    USERNAME_FIELD = 'id'
+
+    gitee_id = models.CharField(verbose_name='GiteeID', max_length=100)
+    signature = models.CharField(verbose_name='签名', max_length=255, blank=True, null=True)
     create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
-    expire_time = models.IntegerField(verbose_name='过期时间', default=0)
+    last_login = models.DateTimeField(verbose_name='上次登录时间', auto_now=True, null=True, blank=True)
 
 
 class Group(models.Model):
+    """SIG组表"""
     name = models.CharField(verbose_name='sig组名称', max_length=50)
-    members = models.TextField(verbose_name='sig组成员')
     create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
+
+
+class GroupUser(models.Model):
+    """组与用户表"""
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('group', 'user')
+
 
 
 class Meeting(models.Model):
