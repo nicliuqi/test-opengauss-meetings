@@ -4,6 +4,7 @@ import json
 import random
 import requests
 from django.conf import settings
+from obs import ObsClient
 
 logger = logging.getLogger('log')
 

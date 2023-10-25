@@ -132,10 +132,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'opengauss_meetings',
-        'USER': DEFAULT_CONF.get('DB_USER', 'root'),
-        'PASSWORD': DEFAULT_CONF.get('DB_PASSWORD', '123456'),
-        'HOST': DEFAULT_CONF.get('DB_HOST', '127.0.0.1'),
-        'PORT': DEFAULT_CONF.get('DB_PORT', '3306'),
+        'USER': DEFAULT_CONF.get('DB_USER'),
+        'PASSWORD': DEFAULT_CONF.get('DB_PASSWORD'),
+        'HOST': DEFAULT_CONF.get('DB_HOST'),
+        'PORT': DEFAULT_CONF.get('DB_PORT'),
     }
 }
 
@@ -276,9 +276,11 @@ GMAIL_USERNAME = DEFAULT_CONF.get('GMAIL_USERNAME', '')
 GMAIL_PASSWORD = DEFAULT_CONF.get('GMAIL_PASSWORD', '')
 SMTP_SERVER_HOST = DEFAULT_CONF.get('SMTP_SERVER_HOST', '')
 SMTP_SERVER_PORT = 25
+CSRF_COOKIE_AGE = 1800
 CSRF_COOKIE_NAME = 'meeting-csrftoken'
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = 'strict'
 COOKIE_EXPIRE = timedelta(minutes=30)
 ACCESS_TOKEN_NAME = 'meeting-accesstoken'
-
+ZOOM_AUTH_URL = DEFAULT_CONF.get('ZOOM_AUTH_URL')
+ZOOM_AUTH_HEADER = DEFAULT_CONF.get('ZOOM_AUTH_HEADER')
