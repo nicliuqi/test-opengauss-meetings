@@ -34,19 +34,19 @@ if sys.argv[0] == 'uwsgi':
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-GITEE_OAUTH_CLIENT_ID = DEFAULT_CONF.get('GITEE_OAUTH_CLIENT_ID', '')
+GITEE_OAUTH_CLIENT_ID = DEFAULT_CONF.get('GITEE_OAUTH_CLIENT_ID')
 
-GITEE_OAUTH_CLIENT_SECRET = DEFAULT_CONF.get('GITEE_OAUTH_CLIENT_SECRET', '')
+GITEE_OAUTH_CLIENT_SECRET = DEFAULT_CONF.get('GITEE_OAUTH_CLIENT_SECRET')
 
-GITEE_OAUTH_REDIRECT = DEFAULT_CONF.get('GITEE_OAUTH_REDIRECT', '')
+GITEE_OAUTH_REDIRECT = DEFAULT_CONF.get('GITEE_OAUTH_REDIRECT')
 
-REDIRECT_HOME_PAGE = DEFAULT_CONF.get('REDIRECT_HOME_PAGE', '')
+REDIRECT_HOME_PAGE = DEFAULT_CONF.get('REDIRECT_HOME_PAGE')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = DEFAULT_CONF.get('SECRET_KEY', '')
+SECRET_KEY = DEFAULT_CONF.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -141,18 +141,18 @@ DATABASES = {
 
 OPENGAUSS_MEETING_HOSTS = {
     'zoom': {
-        DEFAULT_CONF.get('ZOOM_HOST_FIRST', ''): DEFAULT_CONF.get('ZOOM_ACCOUNT_FIRST', ''),
-        DEFAULT_CONF.get('ZOOM_HOST_SECOND', ''): DEFAULT_CONF.get('ZOOM_ACCOUNT_SECOND', '')
+        DEFAULT_CONF.get('ZOOM_HOST_FIRST'): DEFAULT_CONF.get('ZOOM_ACCOUNT_FIRST'),
+        DEFAULT_CONF.get('ZOOM_HOST_SECOND'): DEFAULT_CONF.get('ZOOM_ACCOUNT_SECOND')
     },
     'welink': {
-        DEFAULT_CONF.get('WELINK_HOST_1', ''): DEFAULT_CONF.get('WELINK_HOST_1', '')
+        DEFAULT_CONF.get('WELINK_HOST_1'): DEFAULT_CONF.get('WELINK_HOST_1')
     }
 }
 
 WELINK_HOSTS = {
-    DEFAULT_CONF.get('WELINK_HOST_1', ''): {
-        'account': DEFAULT_CONF.get('WELINK_HOST_1_ACCOUNT', ''),
-        'pwd': DEFAULT_CONF.get('WELINK_HOST_1_PWD', '')
+    DEFAULT_CONF.get('WELINK_HOST_1'): {
+        'account': DEFAULT_CONF.get('WELINK_HOST_1_ACCOUNT'),
+        'pwd': DEFAULT_CONF.get('WELINK_HOST_1_PWD')
     }
 }
 
@@ -194,57 +194,50 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATIC_URL = '/static/'
 
-cur_path = os.path.dirname(os.path.realpath(__file__))  # log_path是存放日志的路径
+cur_path = os.path.dirname(os.path.realpath(__file__))
 
 log_path = os.path.join(os.path.dirname(cur_path), 'logs')
 
 if not os.path.exists(log_path):
-    os.mkdir(log_path)  # 如果不存在这个logs文件夹，就自动创建一个
+    os.mkdir(log_path)
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
-        # 日志格式
         'standard': {
             'format': '[%(asctime)s] [%(filename)s:%(lineno)d] [%(module)s:%(funcName)s] '
                       '[%(levelname)s]- %(message)s'},
-        'simple': {  # 简单格式
+        'simple': {
             'format': '%(levelname)s %(message)s'
         },
     },
-    # 过滤
     'filters': {
     },
-    # 定义具体处理日志的方式
     'handlers': {
-        # 默认记录所有日志
         'default': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(log_path, 'all-{}.log'.format(time.strftime('%Y-%m-%d'))),
-            'maxBytes': 1024 * 1024 * 5,  # 文件大小
-            'backupCount': 5,  # 备份数
-            'formatter': 'standard',  # 输出格式
-            'encoding': 'utf-8',  # 设置默认编码，否则打印出来汉字乱码
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'standard',
+            'encoding': 'utf-8',
         },
-        # 输出错误日志
         'error': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(log_path, 'error-{}.log'.format(time.strftime('%Y-%m-%d'))),
-            'maxBytes': 1024 * 1024 * 5,  # 文件大小
-            'backupCount': 5,  # 备份数
-            'formatter': 'standard',  # 输出格式
-            'encoding': 'utf-8',  # 设置默认编码
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'standard',
+            'encoding': 'utf-8',
         },
-        # 控制台输出
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'standard'
         },
-        # 输出info日志
         'info': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
@@ -252,18 +245,15 @@ LOGGING = {
             'maxBytes': 1024 * 1024 * 5,
             'backupCount': 5,
             'formatter': 'standard',
-            'encoding': 'utf-8',  # 设置默认编码
+            'encoding': 'utf-8',
         },
     },
-    # 配置用哪几种 handlers 来处理日志
     'loggers': {
-        # 类型 为 django 处理所有类型的日志， 默认调用
         'django': {
             'handlers': ['default', 'console'],
             'level': 'INFO',
             'propagate': False
         },
-        # log 调用时需要当作参数传入
         'log': {
             'handlers': ['error', 'info', 'console', 'default'],
             'level': 'INFO',
@@ -272,9 +262,9 @@ LOGGING = {
     }
 }
 
-GMAIL_USERNAME = DEFAULT_CONF.get('GMAIL_USERNAME', '')
-GMAIL_PASSWORD = DEFAULT_CONF.get('GMAIL_PASSWORD', '')
-SMTP_SERVER_HOST = DEFAULT_CONF.get('SMTP_SERVER_HOST', '')
+GMAIL_USERNAME = DEFAULT_CONF.get('GMAIL_USERNAME')
+GMAIL_PASSWORD = DEFAULT_CONF.get('GMAIL_PASSWORD')
+SMTP_SERVER_HOST = DEFAULT_CONF.get('SMTP_SERVER_HOST')
 SMTP_SERVER_PORT = 25
 CSRF_COOKIE_AGE = 1800
 CSRF_COOKIE_NAME = 'meeting-csrftoken'

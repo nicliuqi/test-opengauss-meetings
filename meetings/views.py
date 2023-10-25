@@ -126,6 +126,50 @@ class GiteeBackView(GenericAPIView, ListModelMixin):
             return JsonResponse(r.json())
 
 
+class LoginView(GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        code = self.request.data.get('code')
+        client_id = settings.GITEE_OAUTH_CLIENT_ID
+        client_secret = settings.GITEE_OAUTH_CLIENT_SECRET
+        redirect_uri = settings.GITEE_OAUTH_REDIRECT
+        r = requests.post(
+            'https://gitee.com/oauth/token?grant_type=authorization_code&code={}&client_id={}&redirect_uri={}&client_secret={}'.format(
+                code, client_id, redirect_uri, client_secret))
+        if r.status_code != 200:
+            resp = JsonResponse({
+                'code': 400,
+                'msg': 'Fail to login'
+            })
+            resp.status_code = 400
+            return resp
+        access_token = r.json()['access_token']
+        r = requests.get('https://gitee.com/api/v5/user?access_token={}'.format(access_token))
+        gid = r.json()['id']
+        gitee_id = r.json()['login']
+        name = r.json()['name']
+        avatar = r.json()['avatar_url']
+        if not User.objects.filter(gid=gid):
+            User.objects.create(gid=gid, gitee_id=gitee_id, name=name, avatar=avatar)
+        else:
+            User.objects.filter(gid=gid).update(gitee_id=gitee_id, name=name, avatar=avatar)
+            # response = redirect(settings.REDIRECT_HOME_PAGE)
+            user_id = User.objects.get(gid=gid).id
+            iv = secrets.token_hex(8)
+            access_token = cryptos.encrypt(str(user_id), iv.encode('utf-8'))
+            now_time = datetime.datetime.now()
+            expire = now_time + settings.COOKIE_EXPIRE
+            expire_timestamp = int(time.mktime(expire.timetuple()))
+            User.objects.filter(gid=gid).update(expire_time=expire_timestamp)
+            # response.set_cookie(settings.ACCESS_TOKEN_NAME, access_token + iv, expires=expire, secure=True,
+            #                     httponly=True, samesite='strict')
+            request.META['CSRF_COOKIE'] = get_token(self.request)
+            return JsonResponse({
+                'code': 200,
+                'msg': 'success',
+                'access_token': access_token
+            })
+
+
 class LogoutView(GenericAPIView):
     """
     Log out
