@@ -9,6 +9,10 @@ from obs import ObsClient
 logger = logging.getLogger('log')
 
 
+def get_url(uri):
+    return settings.ZOOM_API_PREFIX + uri
+
+
 def createMeeting(date, start, end, topic, host, record):
     start_time = (datetime.datetime.strptime(date + start, '%Y-%m-%d%H:%M') - datetime.timedelta(hours=8)).strftime(
         '%Y-%m-%dT%H:%M:%SZ')
@@ -34,8 +38,8 @@ def createMeeting(date, start, end, topic, host, record):
             'jbh_time': 5
         }
     }
-    url = "https://api.zoom.us/v2/users/{}/meetings".format(host)
-    response = requests.post(url, data=json.dumps(payload), headers=headers)
+    uri = "/v2/users/{}/meetings".format(host)
+    response = requests.post(get_url(uri), data=json.dumps(payload), headers=headers)
     resp_dict = {}
     if response.status_code != 201:
         return response.status_code, resp_dict
@@ -67,30 +71,28 @@ def updateMeeting(mid, date, start, end, topic, record):
         "content-type": "application/json",
         "authorization": "Bearer {}".format(token)
     }
-    url = "https://api.zoom.us/v2/meetings/{}".format(mid)
+    uri = "/v2/meetings/{}".format(mid)
     # 发送patch请求，修改会议
-    response = requests.patch(url, data=json.dumps(new_data), headers=headers)
+    response = requests.patch(get_url(uri), data=json.dumps(new_data), headers=headers)
     return response.status_code
 
 
 def cancelMeeting(mid):
-    url = "https://api.zoom.us/v2/meetings/{}".format(mid)
+    uri = "/v2/meetings/{}".format(mid)
     token = getOauthToken()
     headers = {
         "authorization": "Bearer {}".format(token)
     }
-    response = requests.request("DELETE", url, headers=headers)
+    response = requests.request("DELETE", get_url(uri), headers=headers)
     return response.status_code
 
 
 def getParticipants(mid):
-    url = "https://api.zoom.us/v2/past_meetings/{}/participants?page_size=300".format(mid)
+    uri = "/v2/past_meetings/{}/participants?page_size=300".format(mid)
     token = getOauthToken()
     headers = {
         "authorization": "Bearer {}".format(token)}
-    logger.info(url)
-    logger.info(headers)
-    r = requests.get(url, headers=headers)
+    r = requests.get(get_url(uri), headers=headers)
     if r.status_code == 200:
         total_records = r.json()['total_records']
         participants = r.json()['participants']

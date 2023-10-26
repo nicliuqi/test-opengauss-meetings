@@ -166,7 +166,8 @@ class CreateMeetingView(GenericAPIView, CreateModelMixin):
                 {'code': 1001, 'msg': '请输入正确的结束时间', 'en_msg': 'The end time must be greater than the start time'})
         if date > (datetime.datetime.today() + datetime.timedelta(days=14)).strftime('%Y-%m-%d'):
             logger.warning('The date is more than 14.')
-            return JsonResponse({'code': 1002, 'msg': '预定时间不能超过当前14天', 'en_msg': 'The scheduled time cannot exceed 14'})
+            return JsonResponse({'code': 1002, 'msg': '预定时间不能超过当前14天', 'en_msg':
+                'The scheduled time cannot exceed 14'})
         start_search = datetime.datetime.strftime(
             (datetime.datetime.strptime(start, '%H:%M') - datetime.timedelta(minutes=30)),
             '%H:%M')
@@ -328,7 +329,8 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
         # 查询待创建的会议与现有的预定会议是否冲突
         meeting = Meeting.objects.get(mid=mid)
         host_id = meeting.host_id
-        if Meeting.objects.filter(date=date, is_delete=0, host_id=host_id, end__gt=start_search, start__lt=end_search).exclude(mid=mid):
+        if Meeting.objects.filter(date=date, is_delete=0, host_id=host_id, end__gt=start_search, start__lt=end_search).\
+                exclude(mid=mid):
             logger.info('会议冲突！主持人在{}-{}已经创建了会议'.format(start_search, end_search))
             return JsonResponse({'code': 400, 'msg': '会议冲突！主持人在{}-{}已经创建了会议'.format(start_search, end_search),
                                  'en_msg': 'Schedule time conflict'})
@@ -389,8 +391,7 @@ class UpdateMeetingView(GenericAPIView, UpdateModelMixin, DestroyModelMixin, Ret
         Meeting.objects.filter(mid=mid).update(sequence=sequence + 1)
         # 返回请求数据
         access = refresh_access(self.request.user)
-        resp = {'code': 204, 'msg': '修改成功', 'en_msg': 'Update successfully', 'id': mid}
-        resp['access'] = access
+        resp = {'code': 204, 'msg': '修改成功', 'en_msg': 'Update successfully', 'id': mid, 'access': access}
         response = JsonResponse(resp)
         return response
 
@@ -447,9 +448,8 @@ class DeleteMeetingView(GenericAPIView, UpdateModelMixin):
         sendmail(m)
         Meeting.objects.filter(mid=mid).update(sequence=sequence + 1)
         access = refresh_access(self.request.user)
-        response = JsonResponse({'code': 204, 'msg': '已删除会议{}'.format(mid), 'en_msg': 'Delete successfully'})
-        response['access'] = access
-        return response
+        resp = {'code': 204, 'msg': '已删除会议', 'en_msg': 'Delete successfully', 'access': access}
+        return JsonResponse(resp)
 
 
 class GroupsView(GenericAPIView, ListModelMixin):
