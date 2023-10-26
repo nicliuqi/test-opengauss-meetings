@@ -91,7 +91,6 @@ class Meeting(models.Model):
     community = models.CharField(verbose_name='社区', max_length=40, null=True, blank=True)
     group_name = models.CharField(verbose_name='SIG组', max_length=40, null=True, blank=True)
     sponsor = models.CharField(verbose_name='发起人', max_length=20)
-    avatar = models.CharField(verbose_name='发起人头像', max_length=255, null=True, blank=True)
     date = models.CharField(verbose_name='会议日期', max_length=30)
     start = models.CharField(verbose_name='会议开始时间', max_length=30)
     end = models.CharField(verbose_name='会议结束时间', max_length=30)

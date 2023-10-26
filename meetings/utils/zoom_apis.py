@@ -101,11 +101,11 @@ def getParticipants(mid):
 
 
 def getOauthToken():
-    access_key_id = settings.DEFAULT_CONF.get('ACCESS_KEY_ID_2')
-    secret_access_key = settings.DEFAULT_CONF.get('SECRET_ACCESS_KEY_2')
-    endpoint = settings.DEFAULT_CONF.get('OBS_ENDPOINT_2')
-    bucketName = settings.DEFAULT_CONF.get('OBS_BUCKETNAME_2')
-    object_key = settings.DEFAULT_CONF.get('ZOOM_TOKEN_OBJECT')
+    access_key_id = settings.ACCESS_KEY_ID_2
+    secret_access_key = settings.SECRET_ACCESS_KEY_2
+    endpoint = settings.OBS_ENDPOINT_2
+    bucketName = settings.OBS_BUCKETNAME_2
+    object_key = settings.ZOOM_TOKEN_OBJECT
     obs_client = ObsClient(access_key_id=access_key_id, secret_access_key=secret_access_key, server=endpoint)
     res = obs_client.getObjectMetadata(bucketName, object_key)
     token = ''

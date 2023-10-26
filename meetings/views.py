@@ -47,9 +47,8 @@ class LoginView(GenericAPIView):
         client_id = settings.GITEE_OAUTH_CLIENT_ID
         client_secret = settings.GITEE_OAUTH_CLIENT_SECRET
         redirect_uri = settings.GITEE_OAUTH_REDIRECT
-        r = requests.post(
-            'https://gitee.com/oauth/token?grant_type=authorization_code&code={}&client_id={}&redirect_uri={}&client_secret={}'.format(
-                code, client_id, redirect_uri, client_secret))
+        r = requests.post('{}?grant_type=authorization_code&code={}&client_id={}&redirect_uri={}&client_secret={}'.
+                          format(settings.GITEE_OAUTH_URL, code, client_id, redirect_uri, client_secret))
         if r.status_code != 200:
             resp = JsonResponse({
                 'code': 400,
@@ -58,7 +57,7 @@ class LoginView(GenericAPIView):
             resp.status_code = 400
             return resp
         access_token = r.json()['access_token']
-        r = requests.get('https://gitee.com/api/v5/user?access_token={}'.format(access_token))
+        r = requests.get('{}/user?access_token={}'.format(settings.GITEE_V5_API_PREFIX, access_token))
         gitee_id = r.json()['login']
         encrypt_gitee_id = encrypt(gitee_id)
         if not User.objects.filter(gitee_id=encrypt_gitee_id):
@@ -503,7 +502,6 @@ class MeetingsDataView(GenericAPIView, ListModelMixin):
                             'name': meeting.topic,
                             'creator': meeting.sponsor,
                             'detail': meeting.agenda,
-                            'url': User.objects.get(id=meeting.user_id).avatar,
                             'join_url': meeting.join_url,
                             'meeting_id': meeting.mid,
                             'etherpad': meeting.etherpad,
@@ -532,7 +530,6 @@ class MeetingsDataView(GenericAPIView, ListModelMixin):
                         'name': meeting.topic,
                         'creator': meeting.sponsor,
                         'detail': meeting.agenda,
-                        'url': User.objects.get(id=meeting.user_id).avatar,
                         'join_url': meeting.join_url,
                         'meeting_id': meeting.mid,
                         'etherpad': meeting.etherpad,

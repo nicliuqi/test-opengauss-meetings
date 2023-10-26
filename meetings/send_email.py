@@ -5,7 +5,6 @@ import pytz
 import re
 import smtplib
 import subprocess
-import uuid
 import yaml
 from django.conf import settings
 from email import encoders
@@ -13,7 +12,6 @@ from email.mime.base import MIMEBase
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from meetings.models import Meeting
 
 logger = logging.getLogger('log')
 
@@ -143,7 +141,7 @@ def sendmail(meeting, record=None, enclosure_paths=None):
 
     msg.attach(part)
 
-    sender = settings.DEFAULT_CONF.get('SMTP_SENDER', '')
+    sender = settings.SMTP_SERVER_SENDER
     # 完善邮件信息
     msg['Subject'] = topic
     msg['From'] = 'openGauss conference <%s>' % sender
@@ -151,12 +149,10 @@ def sendmail(meeting, record=None, enclosure_paths=None):
 
     # 登录服务器发送邮件
     try:
-        gmail_username = settings.GMAIL_USERNAME
-        gmail_password = settings.GMAIL_PASSWORD
         server = smtplib.SMTP(settings.SMTP_SERVER_HOST, settings.SMTP_SERVER_PORT)
         server.ehlo()
         server.starttls()
-        server.login(gmail_username, gmail_password)
+        server.login(settings.SMTP_SERVER_USER, settings.SMTP_SERVER_PASS)
         server.sendmail(sender, toaddrs_list, msg.as_string())
         logger.info('email string: {}'.format(toaddrs))
         logger.info('error addrs: {}'.format(error_addrs))

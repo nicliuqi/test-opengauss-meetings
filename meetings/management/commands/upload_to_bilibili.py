@@ -16,10 +16,10 @@ logger = logging.getLogger('log')
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # 从OBS查询对象
-        access_key_id = settings.DEFAULT_CONF.get('ACCESS_KEY_ID', '')
-        secret_access_key = settings.DEFAULT_CONF.get('SECRET_ACCESS_KEY', '')
-        endpoint = settings.DEFAULT_CONF.get('OBS_ENDPOINT', '')
-        bucketName = settings.DEFAULT_CONF.get('OBS_BUCKETNAME', '')
+        access_key_id = settings.ACCESS_KEY_ID
+        secret_access_key = settings.SECRET_ACCESS_KEY
+        endpoint = settings.OBS_ENDPOINT
+        bucketName = settings.OBS_BUCKETNAME
         if not access_key_id or not secret_access_key or not endpoint or not bucketName:
             logger.error('losing required arguments for ObsClient')
             sys.exit(1)
@@ -128,8 +128,8 @@ class Command(BaseCommand):
 
 def upload(topic, date, videoFile, imageFile, mid, sig, community):
     """上传视频到b站"""
-    sessdata = settings.DEFAULT_CONF.get('SESSDATA', '')
-    bili_jct = settings.DEFAULT_CONF.get('BILI_JCT', '')
+    sessdata = settings.SESSDATA
+    bili_jct = settings.BILI_JCT
     if not sessdata or not bili_jct:
         logger.error('both sessdata and bili_jct required, please check!')
         sys.exit(1)
